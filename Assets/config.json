@@ -1,0 +1,11 @@
+{
+    "DATABASE_CONFIG": {
+        "host": "127.0.0.1",
+        "user": "discord_bot",
+        "database": "discord_bot",
+        "password": "REMOVED",
+        "port": 3306,
+        "autocommit": "True"
+    },
+    "TOKEN": "REMOVED"
+}
