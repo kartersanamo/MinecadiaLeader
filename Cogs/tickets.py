@@ -28,8 +28,10 @@ class TicketButtons(discord.ui.View):
         channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name}-ticket", category=category, overwrites=overwrites)
         await interaction.response.send_message(content=f"Ticket created! {channel.mention}", ephemeral=True)
         embed = discord.Embed(title="Kitmap Bundle Ticket", description=message, color=discord.Color.red())
-        embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-        await channel.send(embed=embed)
+        from Assets.functions import get_embed_logo_url
+        logo_url = get_embed_logo_url("Assets/Logo.png")
+        embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+        await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
 
     @discord.ui.button(label = "Click here to open a Kitmap Bundle Ticket!", style = discord.ButtonStyle.red, custom_id = "2")
     async def kitmap(self, interaction: discord.Interaction, Button: discord.ui.Button):
@@ -44,9 +46,11 @@ class tickets(commands.Cog):
     if is_admin(ctx):
       await ctx.message.delete()
       embed = discord.Embed(title="Request a Bundle!", description=f"If you'd like to request a bundle for the upcoming map of Kitmap, then please press the button down below. This button will open up a ticket for you where you can enter the required information in order to get your bundle!", color=discord.Color.red())
-      embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-      embed.set_thumbnail(url="https://i.imgur.com/DagYV3L.png")
-      await ctx.send(embed=embed, view=TicketButtons())
+      from Assets.functions import get_embed_logo_url
+      logo_url = get_embed_logo_url("Assets/Logo.png")
+      embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+      embed.set_thumbnail(url="attachment://Logo.png")
+      await ctx.send(embed=embed, view=TicketButtons(), file=discord.File("Assets/Logo.png"))
   
   @app_commands.command(name= "toggle-tickets", description="Enables/Disables Kitmap Bundle Tickets")
   @app_commands.check(is_staff)

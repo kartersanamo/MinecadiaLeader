@@ -1,4 +1,4 @@
-from Assets.functions import execute
+from Assets.functions import execute, get_embed_logo_url
 from discord.ext import commands
 from discord import ui
 import discord
@@ -49,21 +49,26 @@ class factions(commands.Cog):
         category = discord.utils.get(member.guild.categories, name= "Archived Channels")
         await channel.edit(category=category)
         embed = discord.Embed(title="Leader left!", description=f"Uh oh! The leader, `{member.name}` has left the discord, so all faction members have been removed from this ticket, and the channel has been archived.", color= discord.Color.red())
-        embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+        from Assets.functions import get_embed_logo_url
+        logo_url = get_embed_logo_url("Assets/Logo.png")
+        embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
         await channel.send(embed=embed)
         await self.remove_from_ticket(member.guild, member.id, channel)
         return
     rows = await execute(f"SELECT * FROM `leader_factions` WHERE `coleader_id_1` = '{member.id}'")
     if rows:
       embed = discord.Embed(title="Coleader left!", description=f"Uh oh! The coleader, `{member.name}` has left the discord, and is no longer in this channel anymore.", color= discord.Color.red())
-      embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-      await channel.send(embed=embed)
+      logo_url = get_embed_logo_url("Assets/Logo.png")
+      embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+      await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
       await self.remove_from_ticket(member.guild, rows[0]['coleader_id_1'], channel)
       return
     rows = await execute(f"SELECT * FROM `leader_factions` WHERE `coleader_id_2` = '{member.id}'")
     if rows:
         embed = discord.Embed(title="Coleader left!", description=f"Uh oh! The coleader, `{member.name}` has left the discord, and is no longer in this channel anymore.", color= discord.Color.red())
-        embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+        from Assets.functions import get_embed_logo_url
+        logo_url = get_embed_logo_url("Assets/Logo.png")
+        embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
         await channel.send(embed=embed)
         await self.remove_from_ticket(member.guild, rows[0]['coleader_id_2'], channel)
         return
@@ -73,8 +78,9 @@ class factions(commands.Cog):
     if is_admin(ctx):
       await ctx.message.delete()
       embed = discord.Embed(title="Role Request", description="Click the button below to request roles! It is important to enter the information requested precisely as this system is automated. Please only request roles for `YOUR` faction with the correct role that you have in that faction.\n \nEach faction can only have:```- 1 Leader\n- 2 Coleaders```Please make a support ticket if you have any questions or run into any issues.", color=discord.Color.red())
-      embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-      await ctx.send(embed=embed, view=RoleButtons())
+      logo_url = get_embed_logo_url("Assets/Logo.png")
+      embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+      await ctx.send(embed=embed, view=RoleButtons(), file=discord.File("Assets/Logo.png"))
   
 class RoleButtons(discord.ui.View):
     def __init__(self)-> None:
@@ -102,7 +108,7 @@ class removeRoles(discord.ui.View):
   async def log(self, interaction: discord.Interaction, IGN: str, faction: str, role: str, action: str, channel: discord.TextChannel):
     logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
     embed = discord.Embed(title=f"Roles {action}", description=f"`User` {interaction.user} ({interaction.user.id})\n`IGN` {IGN}\n`Faction` {faction}\n`Role` {role}\n`Channel` {channel.mention}\n`Invoked` Role Request", color=discord.Color.red())
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = "Assets/Logo.png")
     await logs.send(embed=embed)
   
   async def remove_from_ticket(self, interaction: discord.Interaction, user_id: str, channel: discord.TextChannel):
@@ -125,7 +131,7 @@ class removeRoles(discord.ui.View):
       count = 0
     async for message in channel.history(limit=1, oldest_first=True):
       embed = discord.Embed(title=f"Factions list ({count})", description=f"```{string}```", color=discord.Color.red())
-      embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+      embed.set_footer(text="Minecadia Leader Bot", icon_url = "Assets/Logo.png")
       await message.edit(embed=embed)
   
   @discord.ui.button(emoji= "👍", style= discord.ButtonStyle.red, custom_id= "4")
@@ -153,8 +159,9 @@ class removeRoles(discord.ui.View):
     # Removing the coleader from the ticket if coleader
     if coleader_role in interaction.user.roles:
       embed = discord.Embed(title="Coleader left!", description=f"Uh oh! The coleader, `{interaction.user.name}` has requested for their roles to be removed, and is no longer in this channel anymore.", color=discord.Color.red())
-      embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-      await channel.send(embed=embed)
+      logo_url = get_embed_logo_url("Assets/Logo.png")
+      embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+      await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
       await self.remove_from_ticket(interaction, interaction.user.id, channel)
       await self.old_interaction.edit_original_response(content= "Success! Your `Faction Coleader` role has been removed! Your access to view your faction's ticket has also been removed.", view=empty())
       await interaction.response.defer()
@@ -164,8 +171,9 @@ class removeRoles(discord.ui.View):
       category = discord.utils.get(interaction.guild.categories, name= "Archived Channels")
       await channel.edit(category=category)
       embed = discord.Embed(title="Leader left!", description=f"Uh oh! The leader, `{interaction.user.name}` has requested for their roles to be removed, so all faction members have been removed from this ticket, and the channel has been archived.", color= discord.Color.red())
-      embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-      await channel.send(embed=embed)
+      logo_url = get_embed_logo_url("Assets/Logo.png")
+      embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+      await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
       if rows[0]['coleader_id_1']:
         await self.remove_from_ticket(interaction, rows[0]['coleader_id_1'], channel)
       if rows[0]['coleader_id_2']:
@@ -212,12 +220,14 @@ class AcceptColeader(discord.ui.View):
     perms.view_channel = True
     await channel.set_permissions(coleader, overwrite=perms)
     embed = discord.Embed(title="Coleader joined!", description=f"The coleader, `{coleader}` has been accepted as a coleader for this faction! Welcome him to the ticket!", color=discord.Color.red())
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-    await interaction.channel.send(embed=embed)
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+    await interaction.channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
     
     # Sending their acceptance message
     embed = discord.Embed(title="You have been accepted!", color= discord.Color.red(), description= f"Congratulations! You have been accepted as a coleader to the faction `{self.faction}`! Your faction's ticket can be found here-{interaction.channel.mention} - or at the bottom of the `Minecadia Leader` discord.")
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     try:
       await self.user.send(embed=embed) # I dont think this works
     except:
@@ -225,15 +235,17 @@ class AcceptColeader(discord.ui.View):
     # Logs
     logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
     embed = discord.Embed(title=f"Accepted Coleader", description=f"`Faction` {faction}\n`Coleader` {coleader.mention} ({coleader.id})", color=discord.Color.red())
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-    await logs.send(embed=embed)
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+    await logs.send(embed=embed, file=discord.File("Assets/Logo.png"))
     
   @discord.ui.button(label="Deny!", style= discord.ButtonStyle.red, custom_id= "pizza2")
   async def denyColeader(self, interaction: discord.Interaction, Button: discord.ui.Button):
     await interaction.response.send_message(f"`{interaction.user}` has denied `{self.user}` from being a coleader!")
     await interaction.message.delete()
     embed = discord.Embed(title="You have been denied!", color= discord.Color.red(), description= f"Sorry, but you have been denied access as a coleader to the faction `{self.faction}`!")
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     try:
       channel = await self.user.create_dm() # I dont think this works
       await channel.send(embed=embed)
@@ -261,25 +273,29 @@ class RoleRequest(ui.Modal):
       count = 0
     async for message in channel.history(limit=1, oldest_first=True):
       embed = discord.Embed(title=f"Factions list ({count})", description=f"```{string}```", color=discord.Color.red())
-      embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+      logo_url = get_embed_logo_url("Assets/Logo.png")
+      embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await message.edit(embed=embed)
 
   async def failed(self, interaction: discord.Interaction, IGN: str, faction: str, role: str, error: str):
     logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
     embed = discord.Embed(title="Failed to Give Roles", description=f"`User` {interaction.user} ({interaction.user.id})\n`IGN` {IGN}\n`Faction` {faction}\n`Role` {role}\n`Error` {error}\n`Invoked` Role Request", color=discord.Color.red())
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-    await logs.send(embed=embed)
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+    await logs.send(embed=embed, file=discord.File("Assets/Logo.png"))
 
   async def log(self, interaction: discord.Interaction, IGN: str, faction: str, role: str, action: str, channel: discord.TextChannel):
     logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
     embed = discord.Embed(title=f"Roles {action}", description=f"`User` {interaction.user} ({interaction.user.id})\n`IGN` {IGN}\n`Faction` {faction}\n`Role` {role}\n`Channel` {channel.mention}\n`Invoked` Role Request", color=discord.Color.red())
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-    await logs.send(embed=embed)
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+    await logs.send(embed=embed, file=discord.File("Assets/Logo.png"))
 
   async def request_coleader(self, interaction: discord.Interaction, faction: str, IGN: str):
     # Request for the Coleader to join.
     embed = discord.Embed(title="Coleader request!", description=f"The coleader, `{interaction.user}` has requested to join this faction as a coleader! Anyone in this ticket may accept or deny him. Press one of the buttons below to accept/deny him!", color=discord.Color.red())
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     accept_view = AcceptColeader(interaction.user.id, faction)
     rows = await execute(f"SELECT * FROM leader_factions WHERE faction_name= '{faction}'")
     channel = discord.utils.get(interaction.guild.channels, id=int(rows[0]['channel_id']))
@@ -298,11 +314,12 @@ class RoleRequest(ui.Modal):
       category = discord.utils.get(interaction.guild.categories, id=1196515275764408372)
     channel = await interaction.guild.create_text_channel(name=f"{faction}-ticket", category=category, overwrites=overwrites)
     embed1 = discord.Embed(title=f"{faction}'s Faction Ticket", description="Welcome to your faction ticket. This is where you will manage all support relating to your faction specifically. If you would like to make a request, run the command `/request (option)` which will open a thread where you can speak directly to a staff member to help you out. If you have any questions about how this process works, ask a staff member!", color=discord.Color.red())
-    embed1.set_thumbnail(url="https://i.imgur.com/DagYV3L.png")
+    embed1.set_thumbnail(url="attachment://Logo.png")
     embed2 = discord.Embed(title = "Faction Admin List", description = "Your admin list is a list of players who can recieve 3 star from a staff member at any time where the current 3 star is not available. Predefining this list saves some time in the future. Run `/admin-list` to edit your faction's admin list!", color = discord.Color.red())
     embed2.add_field(name = "Admin List", value = f"```#1 - None```")
-    embed2.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-    await channel.send(embeds = [embed1, embed2])
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed2.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+    await channel.send(embeds = [embed1, embed2], file=discord.File("Assets/Logo.png"))
     
     # Adding information to database
     await execute(f"INSERT INTO leader_factions (faction_name, leader_id, coleader_id_1, coleader_id_2, channel_id) VALUES ('{faction}', '{interaction.user.id}', '', '', '{channel.id}')")

@@ -37,11 +37,13 @@ class close(commands.Cog):
     key = json.loads(requests.post('https://paste.md-5.net/documents', data=content).content)['key']
     link = f"https://paste.md-5.net/{key}"
     embed = discord.Embed(color=discord.Color.red(), title=f"🎟️ {interaction.channel.name} log", description=f"__**Kitmap Bundle Ticket**__\n**Reason:** {reason}\n**Owner:** {user_name} ({user_id})\n**Transcript:** {link}")
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-    await channel.send(embed=embed)
+    from Assets.functions import get_embed_logo_url
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+    await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
     try:
       channel = await user.create_dm()
-      await channel.send(embed=embed)
+      await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
     except:
       pass
     await interaction.channel.delete()

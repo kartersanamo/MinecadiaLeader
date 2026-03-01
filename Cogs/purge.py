@@ -90,7 +90,9 @@ class purge(commands.Cog):
     channel = discord.utils.get(interaction.guild.channels, name="faction-list")
     async for message in channel.history(limit=1, oldest_first=True):
       embed = discord.Embed(title=f"Factions in Season 3 (0)", description=f"```None```", color=discord.Color.red())
-      embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+      from Assets.functions import get_embed_logo_url
+      logo_url = get_embed_logo_url("Assets/Logo.png")
+      embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await message.edit(embed=embed)
     
   @purge.error

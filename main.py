@@ -5,6 +5,10 @@ from discord.ext import commands
 from typing import Literal
 import discord
 import json
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Client(commands.Bot):
   def __init__(self):
@@ -36,7 +40,8 @@ async def reload(interaction: discord.Interaction, cog:Literal["ListThreads", "R
     else:
         return await interaction.response.send_message(f"You are not permitted to do this!", ephemeral=True)
 
-with open("MinecadiaLeader/Assets/config.json", 'r') as f:
-  TOKEN = json.load(f)['TOKEN']
+TOKEN = os.getenv("DISCORD_TOKEN")
+if not TOKEN:
+    raise ValueError("Set DISCORD_TOKEN in .env")
 
 client.run(TOKEN)

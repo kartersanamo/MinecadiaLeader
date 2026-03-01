@@ -1,23 +1,53 @@
 import aiomysql
 import discord
 import json
+from typing import Optional
+import os
 
 def get_data():
-   with open("MinecadiaLeader/Assets/config.json", "r") as file:
+   with open("Assets/config.json", "r") as file:
       return json.load(file)
+
+def get_db_config():
+    """Database config from .env (preferred) or config.json."""
+    if os.getenv("DB_HOST"):
+        return {
+            "host": os.getenv("DB_HOST", "127.0.0.1"),
+            "port": int(os.getenv("DB_PORT", "3306")),
+            "user": os.getenv("DB_USER", ""),
+            "password": os.getenv("DB_PASSWORD", ""),
+            "database": os.getenv("DB_NAME", "") or os.getenv("DB_DATABASE", ""),
+            "autocommit": os.getenv("DB_AUTOCOMMIT", "true").lower() in ("1", "true", "yes"),
+        }
+    data = get_data()
+    return data.get("DATABASE_CONFIG") or {}
    
 data = get_data()
 
 async def connect():
+    cfg = get_db_config()
     return await aiomysql.connect(
-        host=data["DATABASE_CONFIG"]["host"],
-        port=data["DATABASE_CONFIG"]["port"],
-        user=data["DATABASE_CONFIG"]["user"],
-        password=data["DATABASE_CONFIG"]["password"],
-        db=data["DATABASE_CONFIG"]["database"],
-        autocommit=bool(data["DATABASE_CONFIG"]["autocommit"]),
+        host=cfg.get("host", "127.0.0.1"),
+        port=cfg.get("port", 3306),
+        user=cfg.get("user", ""),
+        password=cfg.get("password", ""),
+        db=cfg.get("database", ""),
+        autocommit=bool(cfg.get("autocommit", True)),
         cursorclass=aiomysql.DictCursor
     )
+
+def get_embed_logo_url(logo_path: Optional[str]) -> Optional[str]:
+    if not logo_path:
+        return None
+
+    if logo_path.startswith(("http://", "https://")):
+        return logo_path
+
+    if os.path.isfile(logo_path):
+        filename = os.path.basename(logo_path)
+        return f"attachment://{filename}"
+
+    return None
 
 async def execute(query):
     rows = []

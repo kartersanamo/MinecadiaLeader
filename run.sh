@@ -1,1 +1,1 @@
-python3 MinecadiaLeader/main.py
+python3 main.py

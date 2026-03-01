@@ -23,8 +23,10 @@ class Lock(commands.Cog):
     embed = discord.Embed(title = "Thread locked!",
                           color= discord.Color.red(),
                           description = f"{interaction.user.mention} has locked this thread.")
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
-    await interaction.response.send_message(embed = embed)
+    from Assets.functions import get_embed_logo_url
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
+    await interaction.response.send_message(embed = embed, file = discord.File("Assets/Logo.png"))
   
   @lock.error
   async def lock_error(self, interaction: discord.Interaction, error):

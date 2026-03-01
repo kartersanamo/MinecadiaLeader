@@ -18,6 +18,7 @@ class request(commands.Cog):
   async def send_mass_strike_reports(self):
     guild = self.client.get_guild(941608654593998878)
     threads = [f"{thread.name} ({thread.parent.name.split('-')[0]})" for thread in guild.threads if (thread.parent and not thread.locked)]
+    if len(threads) == 0: return
     telegram_message: str = f"There are {len(threads)} threads open!\n"
     if threads:
         telegram_message += "\n".join(threads)
@@ -80,7 +81,9 @@ class Modal(ui.Modal):
       telegram_message+=f"{item.label}\n{item.value}\n \n"
     desc+= "**One of our staff members will be with you shortly.**"
     embed = discord.Embed(description=desc, color=discord.Color.red())
-    embed.set_footer(text="Minecadia Leader Bot", icon_url = "https://i.imgur.com/DagYV3L.png")
+    from Assets.functions import get_embed_logo_url
+    logo_url = get_embed_logo_url("Assets/Logo.png")
+    embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     staff_role = discord.utils.get(interaction.guild.roles, name="Staff Team")
     strike_role = discord.utils.get(interaction.guild.roles, name="Strike Team")
     if self.category=="Strike Report" or self.category=="Strike Appeal":
