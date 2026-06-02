@@ -39,36 +39,49 @@ class request(commands.Cog):
     await interaction.response.send_message(content=error, ephemeral=True)
 
 class Modal(ui.Modal):
+  _CUSTOM_IDS = {
+    "Strike Report": "11",
+    "Strike Appeal": "12",
+    "Inside Dispute": "13",
+    "Bundle Request": "14",
+    "Leader Transfer": "15",
+  }
+
   def __init__(self, category) -> None:
     self.category = category
     self.url = "https://api.telegram.org/botREMOVED/sendMessage"
-    
+    self._modal_field_headings: list[str] = []
+    super().__init__(
+      title=self.category,
+      timeout=None,
+      custom_id=self._CUSTOM_IDS[category],
+    )
+
     if self.category == "Strike Report":
-      super().__init__(title=self.category, timeout=None, custom_id="11")
-      self.add_item(ui.TextInput(label="What faction are you reporting", style=discord.TextStyle.short, placeholder="Their faction name..."))
-      self.add_item(ui.TextInput(label="What rule did this faction break", style=discord.TextStyle.short, placeholder="Refer to the rules page..."))
-      self.add_item(ui.TextInput(label="Video evidence links", style=discord.TextStyle.short, placeholder="https://youtube.com/..."))
-      self.add_item(ui.TextInput(label="Explanation of what happened", style=discord.TextStyle.long, placeholder="Please be as detailed as possible...", max_length=3000))
+      self._add_field("What faction are you reporting", style=discord.TextStyle.short, placeholder="Their faction name...")
+      self._add_field("What rule did this faction break", style=discord.TextStyle.short, placeholder="Refer to the rules page...")
+      self._add_field("Video evidence links", style=discord.TextStyle.short, placeholder="https://youtube.com/...")
+      self._add_field("Explanation of what happened", style=discord.TextStyle.long, placeholder="Please be as detailed as possible...", max_length=3000)
     elif self.category == "Strike Appeal":
-      super().__init__(title=self.category, timeout=None, custom_id="12")
-      self.add_item(ui.TextInput(label="Which strike are you appealing?", style=discord.TextStyle.short, placeholder="Which strike is it..."))
+      self._add_field("Which strike are you appealing?", style=discord.TextStyle.short, placeholder="Which strike is it...")
     elif self.category == "Inside Dispute":
-      super().__init__(title=self.category, timeout=None, custom_id="13")
-      self.add_item(ui.TextInput(label="What is the IGN of the insider(s)?", style=discord.TextStyle.short, placeholder="Their IGNs..."))
-      self.add_item(ui.TextInput(label="What coordinates & world did this occur?", style=discord.TextStyle.short, placeholder="Overworld (5000, 256, 5000)..."))
-      self.add_item(ui.TextInput(label="Video Evidence/Logs (if applicable)", style=discord.TextStyle.short, placeholder="Video evidence/logs is preferred..."))
-      self.add_item(ui.TextInput(label="Explanation of what happened", style=discord.TextStyle.long, placeholder="Please be as descriptive as possible...", max_length=3000))
+      self._add_field("What is the IGN of the insider(s)?", style=discord.TextStyle.short, placeholder="Their IGNs...")
+      self._add_field("What coordinates & world did this occur?", style=discord.TextStyle.short, placeholder="Overworld (5000, 256, 5000)...")
+      self._add_field("Video Evidence/Logs (if applicable)", style=discord.TextStyle.short, placeholder="Video evidence/logs is preferred...")
+      self._add_field("Explanation of what happened", style=discord.TextStyle.long, placeholder="Please be as descriptive as possible...", max_length=3000)
     elif self.category == "Bundle Request":
-      super().__init__(title=self.category, timeout=None, custom_id="14")
-      self.add_item(ui.TextInput(label="Which IGN will be receiving the bundle?", style=discord.TextStyle.short, placeholder="Which IGN..."))
-      self.add_item(ui.TextInput(label="What is your faction size", style=discord.TextStyle.short, placeholder="How many members in your roster..."))
-      self.add_item(ui.TextInput(label="Discord link to your faction", style=discord.TextStyle.short, placeholder="discord.gg/minecadia..."))
+      self._add_field("Which IGN will be receiving the bundle?", style=discord.TextStyle.short, placeholder="Which IGN...")
+      self._add_field("What is your faction size", style=discord.TextStyle.short, placeholder="How many members in your roster...")
+      self._add_field("Discord link to your faction", style=discord.TextStyle.short, placeholder="discord.gg/minecadia...")
     elif self.category == "Leader Transfer":
-      super().__init__(title=self.category, timeout=None, custom_id="15")
-      self.add_item(ui.TextInput(label="Which player has leader right now?", style=discord.TextStyle.short, placeholder="Who has leader..."))
-      self.add_item(ui.TextInput(label="Which player needs leader?", style=discord.TextStyle.short, placeholder="Who will get leader..."))
-      self.add_item(ui.TextInput(label="What is the reason for transferring?", style=discord.TextStyle.short, placeholder="Leader is afk..."))
-    
+      self._add_field("Which player has leader right now?", style=discord.TextStyle.short, placeholder="Who has leader...")
+      self._add_field("Which player needs leader?", style=discord.TextStyle.short, placeholder="Who will get leader...")
+      self._add_field("What is the reason for transferring?", style=discord.TextStyle.short, placeholder="Leader is afk...")
+
+  def _add_field(self, heading: str, **kwargs) -> None:
+    self._modal_field_headings.append(heading)
+    self.add_item(ui.TextInput(label=heading, **kwargs))
+
   async def on_submit(self, interaction: discord.Interaction):
     await interaction.response.defer()
     name_of_thread = f"{self.category} {date.today().month}/{date.today().day}/{date.today().year}"
@@ -76,9 +89,11 @@ class Modal(ui.Modal):
     thread = await message.create_thread(name=name_of_thread, reason="Via /request")
     desc = f"Hey {interaction.user.mention}!\n \nYou have created a new thread!\n**Type:** {self.category}\n \n"
     telegram_message = f"New {self.category}\nFaction: {interaction.channel.name.split('-')[0]}\nDiscord: {str(interaction.user)}\n \n"
-    for item in self.children:
-      desc+=f"**{item.label}**\n{item.value}\n \n"
-      telegram_message+=f"{item.label}\n{item.value}\n \n"
+    for heading, item in zip(self._modal_field_headings, self.children):
+      if not isinstance(item, ui.TextInput):
+        continue
+      desc += f"**{heading}**\n{item.value}\n \n"
+      telegram_message += f"{heading}\n{item.value}\n \n"
     desc+= "**One of our staff members will be with you shortly.**"
     embed = discord.Embed(description=desc, color=discord.Color.red())
     from Assets.functions import get_embed_logo_url
