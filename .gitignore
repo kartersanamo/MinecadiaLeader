@@ -1,5 +1,5 @@
 .env
-__pycache__/
+__pycache__/*
 *.py[cod]
 *$py.class
 *.so
@@ -7,3 +7,5 @@ __pycache__/
 .venv
 venv/
 ENV/
+*.pyc
+Assets/__pycache__/*
