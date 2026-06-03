@@ -1,12 +1,26 @@
+import functools
+import logger
 import aiomysql
 import discord
 import json
 from typing import Optional
 import os
+import time
+from dotenv import load_dotenv
+
+load_dotenv()
+
+log_tasks = logger.logging.getLogger("Tasks")
+log_commands = logger.logging.getLogger("Commands")
+
 
 def get_data():
    with open("Assets/config.json", "r") as file:
-      return json.load(file)
+      data = json.load(file)
+   if os.getenv("DISCORD_TOKEN"):
+      data["TOKEN"] = os.getenv("DISCORD_TOKEN")
+   return data
+
 
 def get_db_config():
     """Database config from .env (preferred) or config.json."""
@@ -21,8 +35,34 @@ def get_db_config():
         }
     data = get_data()
     return data.get("DATABASE_CONFIG") or {}
-   
+
+
 data = get_data()
+
+
+def task(action_name: str, log: bool = None):
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            start_time = time.perf_counter()
+            try:
+                result = await func(*args, **kwargs)
+                time_elapsed = round((time.perf_counter() - start_time), 2)
+                if time_elapsed > 3:
+                    log_tasks.warning(
+                        f"{action_name} took a long time to complete and finished in {time_elapsed}s"
+                    )
+                elif log:
+                    log_tasks.info(f"{action_name} completed in {time_elapsed}s")
+                return result
+            except Exception as error:
+                log_tasks.error(
+                    f"{action_name} failed after {round((time.perf_counter() - start_time), 2)}s : {error}"
+                )
+                raise error
+        return wrapper
+    return decorator
+
 
 async def connect():
     cfg = get_db_config()
@@ -35,6 +75,7 @@ async def connect():
         autocommit=bool(cfg.get("autocommit", True)),
         cursorclass=aiomysql.DictCursor
     )
+
 
 def get_embed_logo_url(logo_path: Optional[str]) -> Optional[str]:
     if not logo_path:
@@ -49,21 +90,23 @@ def get_embed_logo_url(logo_path: Optional[str]) -> Optional[str]:
 
     return None
 
+
 async def execute(query):
     rows = []
-    connection = None 
+    connection = None
     try:
         connection = await connect()
         async with connection.cursor() as cursor:
             await cursor.execute(query)
             rows = await cursor.fetchall()
     except Exception as error:
-        print(error)
+        log_tasks.error(f"Error executing query: {query} {error}")
     finally:
         if connection:
             connection.close()
         return rows
-    
+
+
 async def is_found(user: discord.Member, statistic: str):
     rows = await execute(f"SELECT * FROM `statistics` WHERE `user_ID`='{user.id}'")
     if rows:
@@ -72,5 +115,11 @@ async def is_found(user: discord.Member, statistic: str):
         await new_entry(user)
         return 0
 
+
 async def new_entry(user: discord.Member):
-    await execute(f"INSERT INTO `statistics` (`user_ID`, `tickets_closed`, `messages_sent`, `warnings`, `mutes`, `temp_bans`, `bans`, `screenshares`, `manual_bans`, `blacklists`, `revives`, `appeals`, `threads_locked`, `strike_team_votes`, `characters_sent`, `punishment_requests`) VALUES ('{user.id}', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0')")
+    await execute(
+        f"INSERT INTO `statistics` (`user_ID`, `tickets_closed`, `messages_sent`, `warnings`, "
+        f"`mutes`, `temp_bans`, `bans`, `screenshares`, `manual_bans`, `blacklists`, `revives`, "
+        f"`appeals`, `threads_locked`, `strike_team_votes`, `characters_sent`, `punishment_requests`) "
+        f"VALUES ('{user.id}', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0')"
+    )

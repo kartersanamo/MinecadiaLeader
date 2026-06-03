@@ -242,8 +242,9 @@ class editView(discord.ui.View):
           old_faction = member.nick.split("[")[1].split("]")[0]
           await member.edit(nick=member.nick.replace(old_faction, self.faction_name))
         except Exception as e:
-          print(e)
-          
+          from Assets.functions import log_tasks
+          log_tasks.error(f"Failed to update faction nicknames: {e}")
+
     async def f_add_coleader(self, interaction: discord.Interaction):
       channel = discord.utils.get(interaction.guild.channels, id=int(self.channel))
       await interaction.response.send_message(f"Please mention the member that you would like to be added as a coleader to the faction `{self.faction_name}`.", ephemeral=True)
@@ -311,8 +312,9 @@ class editView(discord.ui.View):
         perms.send_messages = action
         await channel.set_permissions(user, overwrite=perms)
       except Exception as e:
-        print(e)
-      
+        from Assets.functions import log_tasks
+        log_tasks.error(f"Failed to edit ticket permissions: {e}")
+
     async def log(self, interaction: discord.Interaction, action:str, field:str):
       logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
       embed = discord.Embed(title=action, description=f"{field}\n`Invoked` Edit Command", color=discord.Color.red())

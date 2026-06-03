@@ -374,7 +374,8 @@ class RoleRequest(ui.Modal):
           await interaction.user.edit(nick=new_tag[:32])
           await interaction.user.add_roles(the_role)
         except Exception as e:
-          print(e)
+          from Assets.functions import log_tasks
+          log_tasks.error(f"Failed to update member nick/roles: {e}")
 
       elif the_role==coleader_role:
         channel = await self.request_coleader(interaction, self.children[1].value, self.children[0].value)
