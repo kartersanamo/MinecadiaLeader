@@ -2,6 +2,7 @@ from Cogs.factions import is_admin, is_staff
 from discord.ext import commands
 from discord import app_commands
 import discord
+from utils.embeds import get_embed_logo_url
 
 class DisabledButton(discord.ui.View):
   def __init__(self) -> None:
@@ -28,7 +29,6 @@ class TicketButtons(discord.ui.View):
         channel = await interaction.guild.create_text_channel(name=f"{interaction.user.name}-ticket", category=category, overwrites=overwrites)
         await interaction.response.send_message(content=f"Ticket created! {channel.mention}", ephemeral=True)
         embed = discord.Embed(title="Kitmap Bundle Ticket", description=message, color=discord.Color.red())
-        from Assets.functions import get_embed_logo_url
         logo_url = get_embed_logo_url("Assets/Logo.png")
         embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
         await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
@@ -46,7 +46,6 @@ class tickets(commands.Cog):
     if is_admin(ctx):
       await ctx.message.delete()
       embed = discord.Embed(title="Request a Bundle!", description=f"If you'd like to request a bundle for the upcoming map of Kitmap, then please press the button down below. This button will open up a ticket for you where you can enter the required information in order to get your bundle!", color=discord.Color.red())
-      from Assets.functions import get_embed_logo_url
       logo_url = get_embed_logo_url("Assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       embed.set_thumbnail(url="attachment://Logo.png")

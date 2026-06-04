@@ -1,7 +1,9 @@
-from Assets.functions import execute, get_embed_logo_url
 from discord.ext import commands
 from discord import ui
 import discord
+from core.database import execute
+from core.loggers import log_tasks
+from utils.embeds import get_embed_logo_url
 
 def is_staff(interaction):
   names_of_roles = ["Staff Team", "Admin", "Strike Team", "*", "Management", "Developer", "Owner"]
@@ -49,7 +51,6 @@ class factions(commands.Cog):
         category = discord.utils.get(member.guild.categories, name= "Archived Channels")
         await channel.edit(category=category)
         embed = discord.Embed(title="Leader left!", description=f"Uh oh! The leader, `{member.name}` has left the discord, so all faction members have been removed from this ticket, and the channel has been archived.", color= discord.Color.red())
-        from Assets.functions import get_embed_logo_url
         logo_url = get_embed_logo_url("Assets/Logo.png")
         embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
         await channel.send(embed=embed)
@@ -66,7 +67,6 @@ class factions(commands.Cog):
     rows = await execute(f"SELECT * FROM `leader_factions` WHERE `coleader_id_2` = '{member.id}'")
     if rows:
         embed = discord.Embed(title="Coleader left!", description=f"Uh oh! The coleader, `{member.name}` has left the discord, and is no longer in this channel anymore.", color= discord.Color.red())
-        from Assets.functions import get_embed_logo_url
         logo_url = get_embed_logo_url("Assets/Logo.png")
         embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
         await channel.send(embed=embed)
@@ -374,7 +374,6 @@ class RoleRequest(ui.Modal):
           await interaction.user.edit(nick=new_tag[:32])
           await interaction.user.add_roles(the_role)
         except Exception as e:
-          from Assets.functions import log_tasks
           log_tasks.error(f"Failed to update member nick/roles: {e}")
 
       elif the_role==coleader_role:

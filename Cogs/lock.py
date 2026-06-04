@@ -1,8 +1,10 @@
 from Cogs.factions import is_staff
-from Assets.functions import execute, is_found
 from discord.ext import commands
 from discord import app_commands
 import discord
+from core.database import execute
+from domain.statistics import is_found
+from utils.embeds import get_embed_logo_url
 
 class Lock(commands.Cog):
   def __init__(self, client: commands.Bot):
@@ -23,7 +25,6 @@ class Lock(commands.Cog):
     embed = discord.Embed(title = "Thread locked!",
                           color= discord.Color.red(),
                           description = f"{interaction.user.mention} has locked this thread.")
-    from Assets.functions import get_embed_logo_url
     logo_url = get_embed_logo_url("Assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     await interaction.response.send_message(embed = embed, file = discord.File("Assets/Logo.png"))

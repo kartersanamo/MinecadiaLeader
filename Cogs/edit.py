@@ -1,8 +1,10 @@
-from Assets.functions import execute
 from Cogs.factions import is_staff
 from discord.ext import commands
 from discord import app_commands
 import discord
+from core.database import execute
+from core.loggers import log_tasks
+from utils.embeds import get_embed_logo_url
 
 class edit(commands.Cog):
   def __init__(self, client: commands.Bot):
@@ -15,7 +17,6 @@ class edit(commands.Cog):
     if interaction.guild is None:
             return await interaction.response.send_message(content="Commands cannot be ran in DMs!", ephemeral=True)
     embed = discord.Embed(title="Minecadia Leader Faction Editor", description=f"Here's the information on `Awaiting Faction` ...", color=discord.Color.red())
-    from Assets.functions import get_embed_logo_url
     logo_url = get_embed_logo_url("Assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     embed.add_field(name="Leader", value="...")
@@ -62,7 +63,6 @@ class editView(discord.ui.View):
         except:
           pass
         embed = discord.Embed(title=f"Minecadia Leader Faction Editor", description=f"Here's the information on `{self.faction_name}` ...", color=discord.Color.red())
-        from Assets.functions import get_embed_logo_url
         logo_url = get_embed_logo_url("Assets/Logo.png")
         embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
         try:
@@ -152,7 +152,6 @@ class editView(discord.ui.View):
       await interaction.response.send_message("Successfully archived this channel!", ephemeral=True)
       await self.f_archive_faction(interaction)
       embed = discord.Embed(title="Minecadia Leader Faction Editor", description=f"Here's the information on `Awaiting Faction` ...", color=discord.Color.red())
-      from Assets.functions import get_embed_logo_url
       logo_url = get_embed_logo_url("Assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       embed.add_field(name="Leader", value="...")
@@ -169,7 +168,6 @@ class editView(discord.ui.View):
       category = discord.utils.get(interaction.guild.categories, name= "Archived Channels")
       await channel.edit(category=category)
       embed = discord.Embed(title="Faction archived!", color=discord.Color.red(), description=f"The faction `{self.faction_name}` has been archived by a staff member. All faction member's access to view this channel has been denied.")
-      from Assets.functions import get_embed_logo_url
       logo_url = get_embed_logo_url("Assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
@@ -204,7 +202,6 @@ class editView(discord.ui.View):
       leader = discord.utils.get(interaction.guild.members, id=int(the_id))
       await self.edit_ticket_perms(interaction, the_id, channel, True)
       embed = discord.Embed(title="Leader swapped!", description=f"The old leader, `{current_leader}` has been swapped in for the new leader, `{leader}` by a staff member. Welcome them to the ticket!", color= discord.Color.red())
-      from Assets.functions import get_embed_logo_url
       logo_url = get_embed_logo_url("Assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
@@ -228,7 +225,6 @@ class editView(discord.ui.View):
       old_name = self.faction_name
       self.faction_name = msg.content
       embed = discord.Embed(title="Faction name changed!", description=f"The name of this faction has been changed from `{old_name}` to `{self.faction_name}` by a staff member!", color=discord.Color.red())
-      from Assets.functions import get_embed_logo_url
       logo_url = get_embed_logo_url("Assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
@@ -242,7 +238,6 @@ class editView(discord.ui.View):
           old_faction = member.nick.split("[")[1].split("]")[0]
           await member.edit(nick=member.nick.replace(old_faction, self.faction_name))
         except Exception as e:
-          from Assets.functions import log_tasks
           log_tasks.error(f"Failed to update faction nicknames: {e}")
 
     async def f_add_coleader(self, interaction: discord.Interaction):
@@ -263,7 +258,6 @@ class editView(discord.ui.View):
       await msg.delete()
       coleader = discord.utils.get(interaction.guild.members, id=int(the_id))
       embed = discord.Embed(title="Coleader joined!", description=f"The coleader, `{coleader}` has been added as a coleader for this faction by a staff member! Welcome him to the ticket!", color=discord.Color.red())
-      from Assets.functions import get_embed_logo_url
       logo_url = get_embed_logo_url("Assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
@@ -294,7 +288,6 @@ class editView(discord.ui.View):
         return await interaction.edit_original_response(content= f"Failed! `{msg.content}` is not a coleader of the faction `{self.faction_name}`")
       coleader = discord.utils.get(interaction.guild.members, id=int(the_id))
       embed = discord.Embed(title="Coleader removed!", description=f"Uh oh! The coleader, `{coleader}` has been removed from this faction by a staff member, and is no longer in this channel anymore.", color=discord.Color.red())
-      from Assets.functions import get_embed_logo_url
       logo_url = get_embed_logo_url("Assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await channel.send(embed=embed, file=discord.File("Assets/Logo.png"))
@@ -312,13 +305,11 @@ class editView(discord.ui.View):
         perms.send_messages = action
         await channel.set_permissions(user, overwrite=perms)
       except Exception as e:
-        from Assets.functions import log_tasks
         log_tasks.error(f"Failed to edit ticket permissions: {e}")
 
     async def log(self, interaction: discord.Interaction, action:str, field:str):
       logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
       embed = discord.Embed(title=action, description=f"{field}\n`Invoked` Edit Command", color=discord.Color.red())
-      from Assets.functions import get_embed_logo_url
       logo_url = get_embed_logo_url("Assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await logs.send(embed=embed, file=discord.File("Assets/Logo.png"))
@@ -337,7 +328,6 @@ class editView(discord.ui.View):
         count = 0
       async for message in channel.history(limit=1, oldest_first=True):
         embed = discord.Embed(title=f"Factions List ({count})", description=f"```{string}```", color=discord.Color.red())
-        from Assets.functions import get_embed_logo_url
         logo_url = get_embed_logo_url("Assets/Logo.png")
         embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
         await message.edit(embed=embed)

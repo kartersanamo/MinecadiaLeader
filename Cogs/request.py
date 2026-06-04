@@ -4,6 +4,7 @@ from datetime import date
 from typing import Literal
 import requests
 import discord
+from utils.embeds import get_embed_logo_url
 
 class request(commands.Cog):
   def __init__(self, client: commands.Bot):
@@ -96,7 +97,6 @@ class Modal(ui.Modal):
       telegram_message += f"{heading}\n{item.value}\n \n"
     desc+= "**One of our staff members will be with you shortly.**"
     embed = discord.Embed(description=desc, color=discord.Color.red())
-    from Assets.functions import get_embed_logo_url
     logo_url = get_embed_logo_url("Assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     staff_role = discord.utils.get(interaction.guild.roles, name="Staff Team")

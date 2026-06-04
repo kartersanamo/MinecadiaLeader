@@ -1,1 +1,3 @@
-{"_comment": "Token and DATABASE_CONFIG are in .env"}
+{"_comment": "Token and DATABASE_CONFIG are in .env",
+"PRESENCE": "play.minecadia.com"
+}

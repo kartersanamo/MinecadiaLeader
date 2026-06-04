@@ -1,9 +1,10 @@
-from Assets.functions import execute
 from discord.ext import commands
 from discord import app_commands
 import json
 import requests
 import discord
+from core.database import execute
+from utils.embeds import get_embed_logo_url
 
 class purge(commands.Cog):
   def __init__(self, client: commands.Bot):
@@ -90,7 +91,6 @@ class purge(commands.Cog):
     channel = discord.utils.get(interaction.guild.channels, name="faction-list")
     async for message in channel.history(limit=1, oldest_first=True):
       embed = discord.Embed(title=f"Factions in Season 3 (0)", description=f"```None```", color=discord.Color.red())
-      from Assets.functions import get_embed_logo_url
       logo_url = get_embed_logo_url("Assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await message.edit(embed=embed)

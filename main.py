@@ -5,12 +5,14 @@ os.chdir(Path(__file__).resolve().parent)
 
 from Cogs.tickets import TicketButtons
 from Cogs.factions import RoleButtons
-from Assets.functions import get_data, task, log_tasks
 
 from discord import app_commands
 from discord.ext import commands
 import discord
 from dotenv import load_dotenv
+from core.config import get_data
+from core.decorators import task
+from core.loggers import log_tasks
 
 load_dotenv()
 
@@ -25,9 +27,9 @@ class Client(commands.Bot):
 
     @task("Setup Cogs")
     async def setup_cogs(self):
-        for ext in self.cogslist:
+        for ext in COG_FILES:
             log_tasks.info(f"Loaded cog {ext}.py")
-            await self.load_extension("Cogs." + ext)
+            await self.load_extension("Cogs." + ext.lower())
     
     @task("Register Analytics")
     async def register_analytics(self):
