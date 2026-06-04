@@ -1,9 +1,8 @@
-from Cogs.factions import is_staff
 from discord.ext import commands
 from discord import app_commands
 import discord
-from core.database import execute
-from domain.statistics import is_found
+
+from utils.permissions import is_staff
 from utils.embeds import get_embed_logo_url
 
 class Lock(commands.Cog):
@@ -20,14 +19,15 @@ class Lock(commands.Cog):
     if interaction.channel.locked:
       return await interaction.response.send_message(content = "Failed! This thread has already been locked! Ask an admin if you need this reopened.", ephemeral = True)
     await interaction.channel.edit(locked = True)
-    threads_locked_stat = await is_found(interaction.user, "threads_locked")
-    await execute(f"UPDATE `statistics` SET `threads_locked` = '{threads_locked_stat + 1}' WHERE `user_ID` = '{interaction.user.id}'")
+    await interaction.client.app.statistics.increment_statistic(
+        interaction.user, "threads_locked"
+    )
     embed = discord.Embed(title = "Thread locked!",
                           color= discord.Color.red(),
                           description = f"{interaction.user.mention} has locked this thread.")
-    logo_url = get_embed_logo_url("Assets/Logo.png")
+    logo_url = get_embed_logo_url("assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
-    await interaction.response.send_message(embed = embed, file = discord.File("Assets/Logo.png"))
+    await interaction.response.send_message(embed = embed, file = discord.File("assets/Logo.png"))
   
   @lock.error
   async def lock_error(self, interaction: discord.Interaction, error):
