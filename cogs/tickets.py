@@ -1,11 +1,11 @@
+from services.permission_service import PermissionService
+from services.permission_service import is_staff
 from discord.ext import commands
 from discord import app_commands
 import discord
 
 from ui.views.disabled_button_view import DisabledButtonView
 from ui.views.ticket_buttons_view import TicketButtonsView
-from utils.embeds import get_embed_logo_url
-from utils.permissions import is_admin, is_staff
 
 
 class TicketsCog(commands.Cog):
@@ -14,7 +14,7 @@ class TicketsCog(commands.Cog):
 
     @commands.command()
     async def sendtickets(self, ctx: commands.Context):
-        if is_admin(ctx):
+        if PermissionService.is_admin_ctx(ctx):
             await ctx.message.delete()
             embed = discord.Embed(
                 title="Request a Bundle!",
@@ -25,7 +25,7 @@ class TicketsCog(commands.Cog):
                 ),
                 color=discord.Color.red(),
             )
-            logo_url = get_embed_logo_url("assets/Logo.png")
+            logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
             embed.set_footer(text="Minecadia Leader Bot", icon_url=logo_url)
             embed.set_thumbnail(url="attachment://Logo.png")
             await ctx.send(

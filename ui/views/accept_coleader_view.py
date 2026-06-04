@@ -1,11 +1,7 @@
 import discord
-from discord import ui
-import discord as discord_module
 
-from core.loggers import log_tasks
 from repositories.faction_repository import FactionRepository
 from services.faction_service import FactionService
-from utils.embeds import get_embed_logo_url
 
 _faction_repo = FactionRepository()
 _faction_svc = FactionService(_faction_repo)
@@ -43,13 +39,13 @@ class AcceptColeaderView(discord.ui.View):
     perms.view_channel = True
     await channel.set_permissions(coleader, overwrite=perms)
     embed = discord.Embed(title="Coleader joined!", description=f"The coleader, `{coleader}` has been accepted as a coleader for this faction! Welcome him to the ticket!", color=discord.Color.red())
-    logo_url = get_embed_logo_url("assets/Logo.png")
+    logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     await interaction.channel.send(embed=embed, file=discord.File("assets/Logo.png"))
     
     # Sending their acceptance message
     embed = discord.Embed(title="You have been accepted!", color= discord.Color.red(), description= f"Congratulations! You have been accepted as a coleader to the faction `{self.faction}`! Your faction's ticket can be found here-{interaction.channel.mention} - or at the bottom of the `Minecadia Leader` discord.")
-    logo_url = get_embed_logo_url("assets/Logo.png")
+    logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     try:
       await self.user.send(embed=embed) # I dont think this works
@@ -58,7 +54,7 @@ class AcceptColeaderView(discord.ui.View):
     # Logs
     logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
     embed = discord.Embed(title=f"Accepted Coleader", description=f"`Faction` {faction}\n`Coleader` {coleader.mention} ({coleader.id})", color=discord.Color.red())
-    logo_url = get_embed_logo_url("assets/Logo.png")
+    logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     await logs.send(embed=embed, file=discord.File("assets/Logo.png"))
     
@@ -67,7 +63,7 @@ class AcceptColeaderView(discord.ui.View):
     await interaction.response.send_message(f"`{interaction.user}` has denied `{self.user}` from being a coleader!")
     await interaction.message.delete()
     embed = discord.Embed(title="You have been denied!", color= discord.Color.red(), description= f"Sorry, but you have been denied access as a coleader to the faction `{self.faction}`!")
-    logo_url = get_embed_logo_url("assets/Logo.png")
+    logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     try:
       channel = await self.user.create_dm() # I dont think this works

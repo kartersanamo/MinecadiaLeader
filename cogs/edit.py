@@ -1,10 +1,9 @@
 from discord.ext import commands
+from services.permission_service import is_staff
 from discord import app_commands
 import discord
 
 from ui.views.edit_faction_view import EditFactionView
-from utils.embeds import get_embed_logo_url
-from utils.permissions import is_staff
 
 
 class EditCog(commands.Cog):
@@ -24,7 +23,7 @@ class EditCog(commands.Cog):
             description="Here's the information on `Awaiting Faction` ...",
             color=discord.Color.red(),
         )
-        logo_url = get_embed_logo_url("assets/Logo.png")
+        logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
         embed.set_footer(text="Minecadia Leader Bot", icon_url=logo_url)
         embed.add_field(name="Leader", value="...")
         embed.add_field(name="Coleader #1", value="...")

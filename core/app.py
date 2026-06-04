@@ -4,7 +4,9 @@ from core.config import ConfigLoader
 from core.database import DatabasePool
 from repositories.faction_repository import FactionRepository
 from repositories.statistics_repository import StatisticsRepository
+from services.embed_service import EmbedService
 from services.faction_service import FactionService
+from services.permission_service import PermissionService
 from services.statistics_service import StatisticsService
 
 
@@ -17,6 +19,8 @@ class BotApp:
         self.statistics = StatisticsService(self.statistics_repo)
         self.factions_repo = FactionRepository(self.db)
         self.factions = FactionService(self.factions_repo)
+        self.permissions = PermissionService()
+        self.embeds = EmbedService()
 
     @classmethod
     def from_bot(cls, bot: commands.Bot) -> "BotApp":

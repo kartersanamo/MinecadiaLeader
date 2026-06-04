@@ -1,5 +1,5 @@
-from utils.permissions import is_staff
 from discord.ext import commands
+from services.permission_service import is_staff
 from discord import app_commands
 import discord
 

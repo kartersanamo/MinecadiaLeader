@@ -1,12 +1,10 @@
 import discord
 from discord import ui
-import discord as discord_module
 
 from core.loggers import log_tasks
 from repositories.faction_repository import FactionRepository
 from ui.views.accept_coleader_view import AcceptColeaderView
 from services.faction_service import FactionService
-from utils.embeds import get_embed_logo_url
 
 _faction_repo = FactionRepository()
 _faction_svc = FactionService(_faction_repo)
@@ -35,28 +33,28 @@ class RoleRequestModal(ui.Modal):
       count = 0
     async for message in channel.history(limit=1, oldest_first=True):
       embed = discord.Embed(title=f"Factions list ({count})", description=f"```{string}```", color=discord.Color.red())
-      logo_url = get_embed_logo_url("assets/Logo.png")
+      logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await message.edit(embed=embed)
 
   async def failed(self, interaction: discord.Interaction, IGN: str, faction: str, role: str, error: str):
     logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
     embed = discord.Embed(title="Failed to Give Roles", description=f"`User` {interaction.user} ({interaction.user.id})\n`IGN` {IGN}\n`Faction` {faction}\n`Role` {role}\n`Error` {error}\n`Invoked` Role Request", color=discord.Color.red())
-    logo_url = get_embed_logo_url("assets/Logo.png")
+    logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     await logs.send(embed=embed, file=discord.File("assets/Logo.png"))
 
   async def log(self, interaction: discord.Interaction, IGN: str, faction: str, role: str, action: str, channel: discord.TextChannel):
     logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
     embed = discord.Embed(title=f"Roles {action}", description=f"`User` {interaction.user} ({interaction.user.id})\n`IGN` {IGN}\n`Faction` {faction}\n`Role` {role}\n`Channel` {channel.mention}\n`Invoked` Role Request", color=discord.Color.red())
-    logo_url = get_embed_logo_url("assets/Logo.png")
+    logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     await logs.send(embed=embed, file=discord.File("assets/Logo.png"))
 
   async def request_coleader(self, interaction: discord.Interaction, faction: str, IGN: str):
     # Request for the Coleader to join.
     embed = discord.Embed(title="Coleader request!", description=f"The coleader, `{interaction.user}` has requested to join this faction as a coleader! Anyone in this ticket may accept or deny him. Press one of the buttons below to accept/deny him!", color=discord.Color.red())
-    logo_url = get_embed_logo_url("assets/Logo.png")
+    logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     accept_view = AcceptColeaderView(interaction.user.id, faction)
     rows = await _execute(f"SELECT * FROM leader_factions WHERE faction_name= '{faction}'")
@@ -79,7 +77,7 @@ class RoleRequestModal(ui.Modal):
     embed1.set_thumbnail(url="attachment://Logo.png")
     embed2 = discord.Embed(title = "Faction Admin List", description = "Your admin list is a list of players who can recieve 3 star from a staff member at any time where the current 3 star is not available. Predefining this list saves some time in the future. Run `/admin-list` to edit your faction's admin list!", color = discord.Color.red())
     embed2.add_field(name = "Admin List", value = f"```#1 - None```")
-    logo_url = get_embed_logo_url("assets/Logo.png")
+    logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
     embed2.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     await channel.send(embeds = [embed1, embed2], file=discord.File("assets/Logo.png"))
     

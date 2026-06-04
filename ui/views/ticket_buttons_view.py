@@ -1,6 +1,5 @@
 import discord
 
-from utils.embeds import get_embed_logo_url
 
 
 class TicketButtonsView(discord.ui.View):
@@ -60,7 +59,7 @@ class TicketButtonsView(discord.ui.View):
         embed = discord.Embed(
             title="Kitmap Bundle Ticket", description=message, color=discord.Color.red()
         )
-        logo_url = get_embed_logo_url("assets/Logo.png")
+        logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
         embed.set_footer(text="Minecadia Leader Bot", icon_url=logo_url)
         await channel.send(embed=embed, file=discord.File("assets/Logo.png"))
 

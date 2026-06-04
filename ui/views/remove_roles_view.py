@@ -1,11 +1,8 @@
 import discord
-from discord import ui
-import discord as discord_module
 
 from repositories.faction_repository import FactionRepository
 from services.faction_service import FactionService
 from ui.views.empty_view import EmptyView
-from utils.embeds import get_embed_logo_url
 
 _faction_repo = FactionRepository()
 _faction_svc = FactionService(_faction_repo)
@@ -71,7 +68,7 @@ class RemoveRolesView(discord.ui.View):
     # Removing the coleader from the ticket if coleader
     if coleader_role in interaction.user.roles:
       embed = discord.Embed(title="Coleader left!", description=f"Uh oh! The coleader, `{interaction.user.name}` has requested for their roles to be removed, and is no longer in this channel anymore.", color=discord.Color.red())
-      logo_url = get_embed_logo_url("assets/Logo.png")
+      logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await channel.send(embed=embed, file=discord.File("assets/Logo.png"))
       await self.remove_from_ticket(interaction, interaction.user.id, channel)
@@ -83,7 +80,7 @@ class RemoveRolesView(discord.ui.View):
       category = discord.utils.get(interaction.guild.categories, name= "Archived Channels")
       await channel.edit(category=category)
       embed = discord.Embed(title="Leader left!", description=f"Uh oh! The leader, `{interaction.user.name}` has requested for their roles to be removed, so all faction members have been removed from this ticket, and the channel has been archived.", color= discord.Color.red())
-      logo_url = get_embed_logo_url("assets/Logo.png")
+      logo_url = interaction.client.app.embeds.get_logo_url("assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await channel.send(embed=embed, file=discord.File("assets/Logo.png"))
       if rows[0]['coleader_id_1']:

@@ -1,7 +1,7 @@
+from services.embed_service import EmbedService
 import discord
 
 from repositories.faction_repository import FactionRepository
-from utils.embeds import get_embed_logo_url
 
 
 class FactionService:
@@ -38,6 +38,6 @@ class FactionService:
                 description=f"```{string}```",
                 color=discord.Color.red(),
             )
-            logo_url = get_embed_logo_url("assets/Logo.png")
+            logo_url = EmbedService.get_logo_url("assets/Logo.png")
             embed.set_footer(text="Minecadia Leader Bot", icon_url=logo_url)
             await message.edit(embed=embed)

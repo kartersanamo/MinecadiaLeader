@@ -1,11 +1,10 @@
-from utils.permissions import is_staff
 from discord.ext import commands
+from services.permission_service import is_staff
 from discord import app_commands
 from datetime import datetime
 import requests
 import discord
 import json
-from utils.embeds import get_embed_logo_url
 
 class close(commands.Cog):
   def __init__(self, client: commands.Bot):
@@ -38,7 +37,7 @@ class close(commands.Cog):
     key = json.loads(requests.post('https://paste.md-5.net/documents', data=content).content)['key']
     link = f"https://paste.md-5.net/{key}"
     embed = discord.Embed(color=discord.Color.red(), title=f"🎟️ {interaction.channel.name} log", description=f"__**Kitmap Bundle Ticket**__\n**Reason:** {reason}\n**Owner:** {user_name} ({user_id})\n**Transcript:** {link}")
-    logo_url = get_embed_logo_url("assets/Logo.png")
+    logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     await channel.send(embed=embed, file=discord.File("assets/Logo.png"))
     try:

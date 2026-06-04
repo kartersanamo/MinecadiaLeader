@@ -1,10 +1,9 @@
+from services.permission_service import PermissionService
 from discord.ext import commands
 import discord
 
 from repositories.faction_repository import FactionRepository
 from ui.views.role_buttons_view import RoleButtonsView
-from utils.embeds import get_embed_logo_url
-from utils.permissions import is_admin
 
 
 class FactionsCog(commands.Cog):
@@ -44,7 +43,7 @@ class FactionsCog(commands.Cog):
                     ),
                     color=discord.Color.red(),
                 )
-                logo_url = get_embed_logo_url("assets/Logo.png")
+                logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
                 embed.set_footer(text="Minecadia Leader Bot", icon_url=logo_url)
                 await channel.send(embed=embed)
                 await self.remove_from_ticket(member.guild, member.id, channel)
@@ -62,7 +61,7 @@ class FactionsCog(commands.Cog):
                 ),
                 color=discord.Color.red(),
             )
-            logo_url = get_embed_logo_url("assets/Logo.png")
+            logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
             embed.set_footer(text="Minecadia Leader Bot", icon_url=logo_url)
             await channel.send(embed=embed, file=discord.File("assets/Logo.png"))
             await self.remove_from_ticket(
@@ -82,7 +81,7 @@ class FactionsCog(commands.Cog):
                 ),
                 color=discord.Color.red(),
             )
-            logo_url = get_embed_logo_url("assets/Logo.png")
+            logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
             embed.set_footer(text="Minecadia Leader Bot", icon_url=logo_url)
             await channel.send(embed=embed)
             await self.remove_from_ticket(
@@ -91,7 +90,7 @@ class FactionsCog(commands.Cog):
 
     @commands.command()
     async def sendrolerequest(self, ctx):
-        if is_admin(ctx):
+        if PermissionService.is_admin_ctx(ctx):
             await ctx.message.delete()
             embed = discord.Embed(
                 title="Role Request",
@@ -105,7 +104,7 @@ class FactionsCog(commands.Cog):
                 ),
                 color=discord.Color.red(),
             )
-            logo_url = get_embed_logo_url("assets/Logo.png")
+            logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
             embed.set_footer(text="Minecadia Leader Bot", icon_url=logo_url)
             await ctx.send(
                 embed=embed,
