@@ -18,7 +18,7 @@ class embed(commands.Cog):
       try:
         if not is_staff(message):
           return
-      except:
+      except Exception:
         return
       split = message.content.split("\n")
       msg = message.content
@@ -61,12 +61,12 @@ class embed(commands.Cog):
           if image:
             try:
               embed.set_image(url=image)
-            except:
+            except Exception:
               pass
           if thumbnail:
             try:
               embed.set_thumbnail(url=thumbnail)
-            except:
+            except Exception:
               pass
           await message.delete()
           if everyone:

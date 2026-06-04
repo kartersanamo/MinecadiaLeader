@@ -49,7 +49,7 @@ class AcceptColeaderView(discord.ui.View):
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     try:
       await self.user.send(embed=embed) # I dont think this works
-    except:
+    except Exception:
       pass
     # Logs
     logs = discord.utils.get(interaction.guild.channels, name="𝖫𝗈𝗀𝗌")
@@ -68,5 +68,5 @@ class AcceptColeaderView(discord.ui.View):
     try:
       channel = await self.user.create_dm() # I dont think this works
       await channel.send(embed=embed)
-    except:
+    except Exception:
       pass

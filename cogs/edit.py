@@ -38,9 +38,6 @@ class EditCog(commands.Cog):
             the_view.faction_name = faction
             await the_view.update_message(interaction)
 
-    @edit.error
-    async def edit_error(self, interaction: discord.Interaction, error):
-        await interaction.response.send_message(content=error, ephemeral=True)
 
 
 async def setup(client: commands.Bot) -> None:

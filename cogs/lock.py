@@ -28,9 +28,5 @@ class Lock(commands.Cog):
     embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
     await interaction.response.send_message(embed = embed, file = discord.File("assets/Logo.png"))
   
-  @lock.error
-  async def lock_error(self, interaction: discord.Interaction, error):
-    await interaction.response.send_message(content=error, ephemeral=True)
-  
 async def setup(client:commands.Bot) -> None:
   await client.add_cog(Lock(client))

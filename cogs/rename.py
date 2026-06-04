@@ -20,12 +20,8 @@ class rename(commands.Cog):
         if type(interaction.channel) == discord.Thread:
            await interaction.response.send_message(content=f"Successfully changed the channel name from **{old_name}** to **{name.replace(' ', '-')}**", ephemeral = True)
         await interaction.response.send_message(content=f"Successfully changed the channel name from **{old_name}** to **{name.replace(' ', '-')}**")
-      except:
+      except Exception:
         await interaction.response.send_message(content=f"Failed! This name contains words not allowed by discord", ephemeral=True)
-  
-  @rename.error
-  async def rename_error(self, interaction: discord.Interaction, error):
-    await interaction.response.send_message(content=error, ephemeral=True)
   
 async def setup(client:commands.Bot) -> None:
   await client.add_cog(rename(client))

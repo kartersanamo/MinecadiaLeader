@@ -43,13 +43,10 @@ class close(commands.Cog):
     try:
       channel = await user.create_dm()
       await channel.send(embed=embed, file=discord.File("assets/Logo.png"))
-    except:
+    except Exception:
       pass
     await interaction.channel.delete()
 
-  @close.error
-  async def close_error(self, interaction: discord.Interaction, error):
-    await interaction.response.send_message(content=error, ephemeral=True)
 
 async def setup(client:commands.Bot) -> None:
   await client.add_cog(close(client))

@@ -54,9 +54,6 @@ class TicketsCog(commands.Cog):
             "Succesfully toggled the kitmap bundles", ephemeral=True
         )
 
-    @toggletickets.error
-    async def toggletickets_error(self, interaction: discord.Interaction, error):
-        await interaction.response.send_message(content=error, ephemeral=True)
 
 
 TicketButtons = TicketButtonsView

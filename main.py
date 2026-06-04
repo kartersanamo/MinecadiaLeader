@@ -3,6 +3,12 @@ from pathlib import Path
 
 os.chdir(Path(__file__).resolve().parent)
 
+import sys
+
+_minecadia_root = Path(__file__).resolve().parent.parent
+if str(_minecadia_root) not in sys.path:
+    sys.path.insert(0, str(_minecadia_root))
+
 from ui.views.ticket_buttons_view import TicketButtonsView
 from ui.views.role_buttons_view import RoleButtonsView
 
@@ -13,7 +19,8 @@ from dotenv import load_dotenv
 from core.app import BotApp
 from core.config import get_data
 from core.decorators import task
-from core.loggers import log_tasks
+from core.loggers import log_commands, log_tasks
+from _errors.setup import wire_bot
 
 load_dotenv()
 
@@ -25,6 +32,7 @@ class Client(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix = '.', intents = discord.Intents().all())
         self.data: dict = get_data()
+        wire_bot(self, bot_name="Leader", log_commands=log_commands, log_tasks=log_tasks)
 
     @task("Setup Cogs")
     async def setup_cogs(self):
@@ -70,6 +78,9 @@ class Client(commands.Bot):
 
     @task("Setup Hook")
     async def setup_hook(self):
+        from _errors.setup import wire_bot_async_setup
+
+        await wire_bot_async_setup(self, bot_name="Leader", log_tasks=log_tasks)
         self.app = BotApp.from_bot(self)
         await self.setup_cogs()
         await self.register_analytics()
@@ -106,10 +117,6 @@ async def cog_autocomplete(_: discord.Interaction, current: str):
 @app_commands.autocomplete(cog = cog_autocomplete)
 async def leaderreload(interaction: discord.Interaction, cog: str):
     await leader_reload_command(interaction, cog)
-
-@leaderreload.error
-async def leaderreload_error(interaction: discord.Interaction, error: discord.app_commands.AppCommandError):
-    await interaction.followup.send(content = error, ephemeral = True) if interaction.response.is_done() else await interaction.response.send_message(content = error, ephemeral = True)
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 if not TOKEN:

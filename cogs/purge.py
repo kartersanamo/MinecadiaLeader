@@ -15,7 +15,7 @@ class purge(commands.Cog):
           if len(message.embeds)>0:
             try:
               split = message.embeds[0].description.split("\n")
-            except:
+            except Exception:
               split = [" "]
             formatted="\ --- Message Embed ---\n"
             for line in split:
@@ -24,7 +24,7 @@ class purge(commands.Cog):
               dic = message.embeds[0].to_dict()
               footer = dic['footer']
               formatted+=f"\t|\n\t| {footer['text']}\n"
-            except:
+            except Exception:
               pass
             formatted+="\t\ ---------------------"
           else:
@@ -65,15 +65,15 @@ class purge(commands.Cog):
           faction_info={"faction_name": "N/A", "coleader_id_1": "", "coleader_id_2": "", "leader_id": ""}
         try:
           leader_name = discord.utils.get(interaction.guild.members, id=int(faction_info['leader_id'])).name
-        except:
+        except Exception:
           leader_name = "N/A"
         try:
           coleader_1_name = discord.utils.get(interaction.guild.members, id=int(faction_info['coleader_id_1'])).name
-        except:
+        except Exception:
           coleader_1_name = "N/A"
         try:
           coleader_2_name = discord.utils.get(interaction.guild.members, id=int(faction_info['coleader_id_2'])).name
-        except:
+        except Exception:
           coleader_2_name = "N/A"
         string = f"----------------------------------------------------------\nFaction Name: {faction_info['faction_name']}\nLeader: {leader_name} ({faction_info['leader_id']})\nColeader #1: {coleader_1_name} ({faction_info['coleader_id_1']})\nColeader #2: {coleader_2_name} ({faction_info['coleader_id_2']})\n----------------------------------------------------------\n"
         string += f"Messages Below\n{await self.get_all_messages(interaction, channel)}\n----------------------------------------------------------\nThreads Below\n"
@@ -94,9 +94,6 @@ class purge(commands.Cog):
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await message.edit(embed=embed)
     
-  @purge.error
-  async def purge_error(self, interaction: discord.Interaction, error):
-    await interaction.response.send_message(content=error, ephemeral=True)
 
 async def setup(client:commands.Bot) -> None:
   await client.add_cog(purge(client))

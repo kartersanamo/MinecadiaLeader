@@ -64,9 +64,6 @@ class RequestCog(commands.Cog):
             )
         await interaction.response.send_modal(RequestModal(type))
 
-    @request.error
-    async def request_error(self, interaction: discord.Interaction, error):
-        await interaction.response.send_message(content=error, ephemeral=True)
 
 
 async def setup(client: commands.Bot) -> None:

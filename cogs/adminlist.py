@@ -26,7 +26,12 @@ class AdminList(commands.Cog):
         def check(m):
             return m.author == interaction.user and m.channel == interaction.channel
         message = await interaction.client.wait_for('message', check = check)
-        await message.delete()
+        try:
+            await message.delete()
+        except discord.NotFound:
+            pass
+        except discord.Forbidden:
+            pass
         await interaction.edit_original_response(embeds = [], content = f"Successfully updated your admin list!")
         igns = message.content.replace(' ', '').split(',')
         igns_string = ""

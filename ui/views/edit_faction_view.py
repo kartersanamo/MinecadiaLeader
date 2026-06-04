@@ -37,26 +37,26 @@ class EditFactionView(discord.ui.View):
           self.coleader_1 = faction_info['coleader_id_1']
           self.coleader_2 = faction_info['coleader_id_2']
           self.channel = faction_info['channel_id']
-        except:
+        except Exception:
           pass
         embed = discord.Embed(title=f"Minecadia Leader Faction Editor", description=f"Here's the information on `{self.faction_name}` ...", color=discord.Color.red())
         logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
         embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
         try:
           leader_mention = discord.utils.get(interaction.guild.members, id=int(faction_info['leader_id'])).mention
-        except:
+        except Exception:
           leader_mention = "N/A"
         try:
           coleader_1_mention =discord.utils.get(interaction.guild.members, id=int(faction_info['coleader_id_1'])).mention
-        except:
+        except Exception:
           coleader_1_mention = "N/A"
         try:
           coleader_2_mention = discord.utils.get(interaction.guild.members, id=int(faction_info['coleader_id_2'])).mention
-        except:
+        except Exception:
           coleader_2_mention = "N/A"
         try:
           channel_mention = discord.utils.get(interaction.guild.channels, id=int(faction_info['channel_id'])).mention
-        except:
+        except Exception:
           channel_mention = "N/A"
         embed.add_field(name="Leader", value=f"{leader_mention} ({faction_info['leader_id']})")
         embed.add_field(name="Coleader #1", value=f"{coleader_1_mention} ({faction_info['coleader_id_1']})")
@@ -171,7 +171,7 @@ class EditFactionView(discord.ui.View):
       msg = await self.client.wait_for('message', check=check)
       try:
         the_id = msg.content.split("<@")[1].split(">")[0]
-      except:
+      except Exception:
         return await interaction.edit_original_response(content= "Failed! Please make sure you **mention** a user.")
       await self.edit_database('leader_id', the_id)
       await self.edit_ticket_perms(interaction, current_leader.id, channel, False)
@@ -225,7 +225,7 @@ class EditFactionView(discord.ui.View):
       msg = await self.client.wait_for('message', check=check)
       try:
         the_id = msg.content.split("<@")[1].split(">")[0]
-      except:
+      except Exception:
         return await interaction.edit_original_response(content= "Failed! Please make sure you **mention** a user.")
       rows = await execute(f"SELECT * FROM leader_factions WHERE `faction_name`= '{self.faction_name}'")
       if rows[0]['coleader_id_1']:
@@ -252,7 +252,7 @@ class EditFactionView(discord.ui.View):
       msg = await self.client.wait_for('message', check=check)
       try:
         the_id = msg.content.split("<@")[1].split(">")[0]
-      except:
+      except Exception:
         return await interaction.edit_original_response(content= "Failed! Please make sure you **mention** a user.")
       rows = await execute(f"SELECT * FROM leader_factions WHERE `faction_name`= '{self.faction_name}'")
       if str(rows[0]['coleader_id_1'])==the_id:
