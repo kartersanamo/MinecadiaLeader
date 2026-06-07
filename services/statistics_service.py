@@ -13,3 +13,7 @@ class StatisticsService:
             return rows[0][statistic]
         await self._repo.insert_default_row(user.id)
         return 0
+
+    async def increment_statistic(self, user: discord.Member, statistic: str) -> None:
+        current = await self.get_statistic(user, statistic)
+        await self._repo.increment_statistic(user.id, statistic, current + 1)

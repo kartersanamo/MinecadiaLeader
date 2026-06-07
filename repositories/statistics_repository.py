@@ -20,3 +20,9 @@ class StatisticsRepository:
             "VALUES (%s, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)",
             (user_id,),
         )
+
+    async def increment_statistic(self, user_id: int, column: str, value: int) -> None:
+        await self._db.execute(
+            f"UPDATE `staff_statistics` SET `{column}` = %s WHERE `user_id` = %s",
+            (value, user_id),
+        )
