@@ -3,3 +3,7 @@
 *.py[cod]
 .venv/
 logs/
+
+# Auto-generated diagrams (regenerate: python3 ../scripts/generate_bot_diagrams.py MinecadiaLeader)
+docs/diagrams/*
+!docs/diagrams/.gitkeep
