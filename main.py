@@ -64,7 +64,7 @@ class Client(commands.Bot):
     async def sync_command_tree(self):
         from core.guild_command_sync import sync_guild_commands
 
-        await sync_guild_commands(self, log=log_tasks)
+        await sync_guild_commands(self, log=log_tasks, also_sync_global=False, clear_global_after_guild=True)
 
     @task("Setup Hook")
     async def setup_hook(self):

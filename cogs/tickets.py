@@ -43,7 +43,7 @@ class TicketsCog(commands.Cog):
             return await interaction.response.send_message(
                 content="Commands cannot be ran in DMs!", ephemeral=True
             )
-        channel = discord.utils.get(interaction.guild.channels, name="bundle-request")
+        channel = discord.utils.get(interaction.guild.channels, id=944576704310042685)
         async for message in channel.history(limit=1):
             msg = message
         if message.components[0].children[0].disabled:
