@@ -35,9 +35,9 @@ class TicketButtonsView(discord.ui.View):
             "**Type:** Kitmap Bundle Ticket\n​\nTo get the best possible support, "
             "please clearly state:```- Your IGN\n- Your Faction Name\n- Faction Size\n"
             "- Discord Link to Faction```\nNOTE: In order to qualify for the faction bundle, "
-            "you must have 8 players in your faction (not roster) on the start of the world. "
-            "You will have 24 hours from the start of the world to get all 8 members in your faction. "
-            "If you cannot get all of your members in time, please let us know!\n​\nNOTE: You must have 8 "
+            "you must have 7 players in your faction (not roster) on the start of the world. "
+            "You will have 24 hours from the start of the world to get all 7 members in your faction. "
+            "If you cannot get all of your members in time, please let us know!\n​\nNOTE: You must have 7 "
             "**unique** players. Meaning, they must be real players and cannot be alt accounts. "
             "WE WILL BE CHECKING.\n​\nOur Staff Team will be with you shortly"
         )
