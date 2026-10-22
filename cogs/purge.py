@@ -96,7 +96,7 @@ class purge(commands.Cog):
     link = f"https://paste.minecadia.com/{key}"
     await interaction.guild.get_channel(941766120082395158).send(content = f"Purge completed by `@{interaction.user}` {link}")  
     # Reset the faction list
-    channel = discord.utils.get(interaction.guild.channels, name="faction-list")
+    channel = interaction.guild.get_channel(1046530489994973236)
     if channel is not None:
       async for message in channel.history(limit=1, oldest_first=True):
         embed = discord.Embed(title=f"Factions in Season 3 (0)", description=f"```None```", color=discord.Color.red())
