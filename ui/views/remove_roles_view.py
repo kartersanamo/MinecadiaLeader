@@ -21,7 +21,7 @@ class RemoveRolesView(discord.ui.View):
     await logs.send(embed=embed)
   
   async def remove_from_ticket(self, interaction: discord.Interaction, user_id: str, channel: discord.TextChannel):
-    user = discord.utils.get(interaction.guild.members, id=int(user_id))
+    user = await interaction.guild.fetch_member(int(user_id))
     perms = channel.overwrites_for(user)
     perms.view_channel = False
     await channel.set_permissions(user, overwrite=perms)

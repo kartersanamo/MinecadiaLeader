@@ -1,6 +1,5 @@
 from discord.ext import commands
 from discord import app_commands
-import json
 import requests
 import discord
 from core.database import execute
@@ -28,7 +27,7 @@ class purge(commands.Cog):
               pass
             formatted+="\t\ ---------------------"
           else:
-            formatted = message.content
+            formatted = "[message content unavailable without Message Content intent]"
           content += f"[{message.created_at.strftime('%a, %b %d, %Y, %I:%M %p')}]\n{message.author.name} : {message.author.id}\n\t{formatted}\n \n"
     return content
   
@@ -47,12 +46,16 @@ class purge(commands.Cog):
     # Remove everyone's roles & reset nicknames
     leader_role = discord.utils.get(interaction.guild.roles, name= "Faction Leader")
     coleader_role = discord.utils.get(interaction.guild.roles, name= "Faction Coleader")
-    for member in leader_role.members:
-      await member.remove_roles(leader_role)
-      await member.edit(nick=member.name)
-    for member in coleader_role.members:
-      await member.remove_roles(coleader_role)
-      await member.edit(nick=member.name)
+    # Use the REST member list rather than the (potentially incomplete)
+    # privileged member cache.
+    members = [member async for member in interaction.guild.fetch_members(limit=None)]
+    for member in members:
+      if leader_role in member.roles:
+        await member.remove_roles(leader_role)
+        await member.edit(nick=member.name)
+      if coleader_role in member.roles:
+        await member.remove_roles(coleader_role)
+        await member.edit(nick=member.name)
     # Remove all factions from the database
     await execute(f"DELETE FROM leader_factions")  
     # Create a paste link with each ticket's (open & archived) information in it
@@ -64,15 +67,15 @@ class purge(commands.Cog):
         if faction_info=="Fail":
           faction_info={"faction_name": "N/A", "coleader_id_1": "", "coleader_id_2": "", "leader_id": ""}
         try:
-          leader_name = discord.utils.get(interaction.guild.members, id=int(faction_info['leader_id'])).name
+          leader_name = (await interaction.guild.fetch_member(int(faction_info['leader_id']))).name
         except Exception:
           leader_name = "N/A"
         try:
-          coleader_1_name = discord.utils.get(interaction.guild.members, id=int(faction_info['coleader_id_1'])).name
+          coleader_1_name = (await interaction.guild.fetch_member(int(faction_info['coleader_id_1']))).name
         except Exception:
           coleader_1_name = "N/A"
         try:
-          coleader_2_name = discord.utils.get(interaction.guild.members, id=int(faction_info['coleader_id_2'])).name
+          coleader_2_name = (await interaction.guild.fetch_member(int(faction_info['coleader_id_2']))).name
         except Exception:
           coleader_2_name = "N/A"
         string = f"----------------------------------------------------------\nFaction Name: {faction_info['faction_name']}\nLeader: {leader_name} ({faction_info['leader_id']})\nColeader #1: {coleader_1_name} ({faction_info['coleader_id_1']})\nColeader #2: {coleader_2_name} ({faction_info['coleader_id_2']})\n----------------------------------------------------------\n"
@@ -83,8 +86,14 @@ class purge(commands.Cog):
         string+= "----------------------------------------------------------"
         await channel.delete(reason="via /purge")
     content = content.encode("utf-8")
-    key = json.loads(requests.post('https://paste.md-5.net/documents', data=content).content)['key']
-    link = f"https://paste.md-5.net/{key}"
+    response = requests.post(
+      "https://paste.minecadia.com/documents",
+      headers={"Content-Type": "application/x-www-form-urlencoded"},
+      data=content,
+      timeout=30,
+    )
+    key = response.json()["key"]
+    link = f"https://paste.minecadia.com/{key}"
     await interaction.guild.get_channel(941766120082395158).send(content = f"Purge completed by `@{interaction.user}` {link}")  
     # Reset the faction list
     channel = discord.utils.get(interaction.guild.channels, name="faction-list")

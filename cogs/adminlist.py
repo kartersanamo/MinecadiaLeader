@@ -1,6 +1,32 @@
-from discord.ext import commands
-from discord import app_commands
 import discord
+from discord import app_commands
+from discord.ext import commands
+
+
+class AdminListModal(discord.ui.Modal, title="Update faction admin list"):
+    names = discord.ui.TextInput(
+        label="Minecraft usernames",
+        placeholder="PlayerOne, PlayerTwo, PlayerThree",
+        style=discord.TextStyle.paragraph,
+        max_length=1000,
+    )
+
+    def __init__(self, interaction: discord.Interaction):
+        super().__init__()
+        self.source_interaction = interaction
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        igns = [ign.strip() for ign in str(self.names.value).split(",") if ign.strip()]
+        igns_string = "\n".join(f"#{index} {ign}" for index, ign in enumerate(igns, 1))
+        await interaction.response.send_message(
+            "Successfully updated your admin list!", ephemeral=True
+        )
+        async for message in interaction.channel.history(limit=1, oldest_first=True):
+            if len(message.embeds) < 2:
+                return
+            embed = message.embeds[1]
+            embed.set_field_at(0, name="Admin List", value=f"```{igns_string}```")
+            await message.edit(embeds=[message.embeds[0], embed])
 
 def is_staff(message):
     names_of_roles = ["*", "Owner", "Management", "Admin", "Developer", "Staff Team"]
@@ -20,28 +46,7 @@ class AdminList(commands.Cog):
             return await interaction.response.send_message(content="Commands cannot be ran in DMs!", ephemeral=True)
         if interaction.channel.category.id not in [1154577495648124949, 1196515275764408372]:
            return await interaction.response.send_message(content = "Failed! This can only be ran inside of your faction ticket!", ephemeral = True)
-        embed = discord.Embed(description = "Please enter a list of IGNs **seperated by commas** that can recieve 3 star for your faction at any time upon request.",
-                             color = discord.Color.red())
-        await interaction.response.send_message(embed = embed, ephemeral = True)
-        def check(m):
-            return m.author == interaction.user and m.channel == interaction.channel
-        message = await interaction.client.wait_for('message', check = check)
-        try:
-            await message.delete()
-        except discord.NotFound:
-            pass
-        except discord.Forbidden:
-            pass
-        await interaction.edit_original_response(embeds = [], content = f"Successfully updated your admin list!")
-        igns = message.content.replace(' ', '').split(',')
-        igns_string = ""
-        for index, ign in enumerate(igns):
-           igns_string += f"#{index + 1} {ign}\n"
-        async for message in interaction.channel.history(limit = 1, oldest_first = True):
-           top_embed = message.embeds[0]
-           embed = message.embeds[1]
-           embed.set_field_at(0, name = "Admin List", value = f"```{igns_string}```")
-           await message.edit(embeds = [top_embed, embed])
+        await interaction.response.send_modal(AdminListModal(interaction))
 
 async def setup(client:commands.Bot) -> None:
   await client.add_cog(AdminList(client))

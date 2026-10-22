@@ -15,7 +15,7 @@ class FactionsCog(commands.Cog):
         self, guild: discord.Guild, user_id: str, channel: discord.TextChannel
     ):
         try:
-            user = discord.utils.get(guild.members, id=int(user_id))
+            user = await guild.fetch_member(int(user_id))
             perms = channel.overwrites_for(user)
             perms.view_channel = False
             await channel.set_permissions(user, overwrite=perms)

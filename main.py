@@ -26,7 +26,6 @@ class Client(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
         intents.members = True
-        intents.message_content = True
         super().__init__(command_prefix='.', intents=intents)
         wire_bot(self, bot_name="Leader", log_commands=log_commands, log_tasks=log_tasks)
 

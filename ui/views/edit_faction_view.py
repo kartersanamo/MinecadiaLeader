@@ -11,6 +11,19 @@ _faction_svc = FactionService(_repo)
 async def execute(query):
     return await DatabasePool.get().execute(query)
 
+class _FactionTextModal(discord.ui.Modal):
+    def __init__(self, title: str, label: str, callback, view, *, max_length: int = 100):
+      super().__init__(title=title)
+      self.callback = callback
+      self.view = view
+      self.value = discord.ui.TextInput(label=label, max_length=max_length)
+      self.add_item(self.value)
+
+    async def on_submit(self, interaction: discord.Interaction):
+      await interaction.response.defer()
+      await self.callback(interaction, str(self.value))
+      await self.view.update_message(interaction)
+
 class EditFactionView(discord.ui.View):
     def __init__(self, client) -> None:
       self.client = client
@@ -43,15 +56,15 @@ class EditFactionView(discord.ui.View):
         logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
         embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
         try:
-          leader_mention = discord.utils.get(interaction.guild.members, id=int(faction_info['leader_id'])).mention
+          leader_mention = await interaction.guild.fetch_member(int(faction_info['leader_id'])).mention
         except Exception:
           leader_mention = "N/A"
         try:
-          coleader_1_mention =discord.utils.get(interaction.guild.members, id=int(faction_info['coleader_id_1'])).mention
+          coleader_1_mention =await interaction.guild.fetch_member(int(faction_info['coleader_id_1'])).mention
         except Exception:
           coleader_1_mention = "N/A"
         try:
-          coleader_2_mention = discord.utils.get(interaction.guild.members, id=int(faction_info['coleader_id_2'])).mention
+          coleader_2_mention = await interaction.guild.fetch_member(int(faction_info['coleader_id_2'])).mention
         except Exception:
           coleader_2_mention = "N/A"
         try:
@@ -92,37 +105,32 @@ class EditFactionView(discord.ui.View):
         return
       else:
         self.update_buttons()
-        await interaction.edit_original_response(content="", embed=embed, view=self)
+        if interaction.message is not None:
+          await interaction.message.edit(content="", embed=embed, view=self)
+        else:
+          await interaction.edit_original_response(content="", embed=embed, view=self)
     
     @discord.ui.button(label="Click here to change the faction!",style=discord.ButtonStyle.grey, row=0, disabled=False, custom_id="change_faction")
     async def change_faction(self, interaction:discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_message("Please enter the name of the faction that you'd like to edit below!", ephemeral=True)
-        def check(m):
-          return m.author == interaction.user and m.channel == interaction.channel
-        msg = await self.client.wait_for('message', check=check)
-        await msg.delete()
-        self.faction_name = msg.content
-        await self.update_message(interaction)
+        async def submit(modal_interaction, value):
+          self.faction_name = value
+        await interaction.response.send_modal(_FactionTextModal("Select faction", "Faction name", submit, self, max_length=100))
     
     @discord.ui.button(label="Swap Leader",style=discord.ButtonStyle.red, row=1, disabled=True, custom_id="swap_leader")
     async def swap_leader(self, interaction:discord.Interaction, button: discord.ui.Button):
-        await self.f_swap_leader(interaction)
-        await self.update_message(interaction)
+        await interaction.response.send_modal(_FactionTextModal("Swap leader", "Mention the new leader", self.f_swap_leader, self))
     
     @discord.ui.button(label="Change Name",style=discord.ButtonStyle.red, row=1, disabled=True, custom_id="change_name")
     async def change_name(self, interaction:discord.Interaction, button: discord.ui.Button):
-        await self.f_change_name(interaction)
-        await self.update_message(interaction)
+        await interaction.response.send_modal(_FactionTextModal("Change faction name", "New faction name", self.f_change_name, self, max_length=10))
         
     @discord.ui.button(label="Add Coleader",style=discord.ButtonStyle.red, row=2, disabled=True, custom_id="add_coleader")
     async def add_coleader(self, interaction:discord.Interaction, button: discord.ui.Button):
-        await self.f_add_coleader(interaction)
-        await self.update_message(interaction)
+        await interaction.response.send_modal(_FactionTextModal("Add coleader", "Mention the coleader", self.f_add_coleader, self))
 
     @discord.ui.button(label="Remove Coleader",style=discord.ButtonStyle.red, row=2, disabled=True, custom_id="remove_coleader")
     async def remove_coleader(self, interaction:discord.Interaction, button: discord.ui.Button):
-        await self.f_remove_coleader(interaction)
-        await self.update_message(interaction)
+        await interaction.response.send_modal(_FactionTextModal("Remove coleader", "Mention the coleader", self.f_remove_coleader, self))
     
     @discord.ui.button(label="Archive & remove this faction", style=discord.ButtonStyle.red, row=3, disabled=True, custom_id="archieve_faction")
     async def archive_faction(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -149,7 +157,7 @@ class EditFactionView(discord.ui.View):
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await channel.send(embed=embed, file=discord.File("assets/Logo.png"))
       for index, val in enumerate([self.leader, self.coleader_1, self.coleader_2]):
-        member = discord.utils.get(interaction.guild.members, id=int(val))
+        member = await interaction.guild.fetch_member(int(val))
         if index!=0:
           role = discord.utils.get(interaction.guild.roles, name="Faction Coleader")
         else:
@@ -162,21 +170,16 @@ class EditFactionView(discord.ui.View):
     async def edit_database(self, column:str, value:str):
       await execute(f"UPDATE leader_factions SET `{column}` = '{value}' WHERE `faction_name`= '{self.faction_name}'")
     
-    async def f_swap_leader(self, interaction: discord.Interaction):
+    async def f_swap_leader(self, interaction: discord.Interaction, value: str):
       channel = discord.utils.get(interaction.guild.channels, id=int(self.channel))
-      current_leader = discord.utils.get(interaction.guild.members, id=int(self.leader))
-      await interaction.response.send_message(f"Please mention the member that you would like to swap `{current_leader} ({self.leader})` with as leader of the faction `{self.faction_name}`.", ephemeral=True)
-      def check(m):
-        return m.author == interaction.user and m.channel == interaction.channel
-      msg = await self.client.wait_for('message', check=check)
+      current_leader = await interaction.guild.fetch_member(int(self.leader))
       try:
-        the_id = msg.content.split("<@")[1].split(">")[0]
+        the_id = value.split("<@")[1].split(">")[0]
       except Exception:
-        return await interaction.edit_original_response(content= "Failed! Please make sure you **mention** a user.")
+        return await interaction.followup.send("Failed! Please make sure you mention a user.", ephemeral=True)
       await self.edit_database('leader_id', the_id)
       await self.edit_ticket_perms(interaction, current_leader.id, channel, False)
-      await msg.delete()
-      leader = discord.utils.get(interaction.guild.members, id=int(the_id))
+      leader = await interaction.guild.fetch_member(int(the_id))
       await self.edit_ticket_perms(interaction, the_id, channel, True)
       embed = discord.Embed(title="Leader swapped!", description=f"The old leader, `{current_leader}` has been swapped in for the new leader, `{leader}` by a staff member. Welcome them to the ticket!", color= discord.Color.red())
       logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
@@ -189,51 +192,41 @@ class EditFactionView(discord.ui.View):
       await leader.edit(nick=f"[{self.faction_name}] {leader.name}")
       await leader.add_roles(leader_role)
     
-    async def f_change_name(self, interaction: discord.Interaction):
+    async def f_change_name(self, interaction: discord.Interaction, value: str):
       channel = discord.utils.get(interaction.guild.channels, id=int(self.channel))
-      await interaction.response.send_message(f"Please enter the name that you would like the faction `{self.faction_name}` to be renamed to.", ephemeral=True)
-      def check(m):
-        return m.author == interaction.user and m.channel == interaction.channel
-      msg = await self.client.wait_for('message', check=check)
-      if len(msg.content)>10:
-        return await interaction.edit_original_response(content= "Failed! Please enter a faction name that is 10 or less characters.")
-      await msg.delete()
-      await self.edit_database('faction_name', msg.content)
+      if len(value)>10:
+        return await interaction.followup.send("Failed! Please enter a faction name that is 10 or less characters.", ephemeral=True)
+      await self.edit_database('faction_name', value)
       old_name = self.faction_name
-      self.faction_name = msg.content
+      self.faction_name = value
       embed = discord.Embed(title="Faction name changed!", description=f"The name of this faction has been changed from `{old_name}` to `{self.faction_name}` by a staff member!", color=discord.Color.red())
       logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
       await channel.send(embed=embed, file=discord.File("assets/Logo.png"))
-      leader = discord.utils.get(interaction.guild.members, id=int(self.leader))
+      leader = await interaction.guild.fetch_member(int(self.leader))
       await channel.edit(name=f"{self.faction_name}-ticket")
       await self.log(interaction, "Faction Name Changed", f"`Leader` {leader.mention} ({leader.id})\n`Channel` {channel.mention}\n`Before` {old_name}\n`After` {self.faction_name}")
       await self.update_faction_list(interaction)
       for val in [self.leader, self.coleader_1, self.coleader_2]:
         try:
-          member = discord.utils.get(interaction.guild.members, id=int(val))
+          member = await interaction.guild.fetch_member(int(val))
           old_faction = member.nick.split("[")[1].split("]")[0]
           await member.edit(nick=member.nick.replace(old_faction, self.faction_name))
         except Exception as e:
           log_tasks.error(f"Failed to update faction nicknames: {e}")
 
-    async def f_add_coleader(self, interaction: discord.Interaction):
+    async def f_add_coleader(self, interaction: discord.Interaction, value: str):
       channel = discord.utils.get(interaction.guild.channels, id=int(self.channel))
-      await interaction.response.send_message(f"Please mention the member that you would like to be added as a coleader to the faction `{self.faction_name}`.", ephemeral=True)
-      def check(m):
-        return m.author == interaction.user and m.channel == interaction.channel
-      msg = await self.client.wait_for('message', check=check)
       try:
-        the_id = msg.content.split("<@")[1].split(">")[0]
+        the_id = value.split("<@")[1].split(">")[0]
       except Exception:
-        return await interaction.edit_original_response(content= "Failed! Please make sure you **mention** a user.")
+        return await interaction.followup.send("Failed! Please make sure you mention a user.", ephemeral=True)
       rows = await execute(f"SELECT * FROM leader_factions WHERE `faction_name`= '{self.faction_name}'")
       if rows[0]['coleader_id_1']:
         await self.edit_database('coleader_id_2', the_id)
       else:
         await self.edit_database('coleader_id_1', the_id)
-      await msg.delete()
-      coleader = discord.utils.get(interaction.guild.members, id=int(the_id))
+      coleader = await interaction.guild.fetch_member(int(the_id))
       embed = discord.Embed(title="Coleader joined!", description=f"The coleader, `{coleader}` has been added as a coleader for this faction by a staff member! Welcome him to the ticket!", color=discord.Color.red())
       logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
@@ -244,26 +237,20 @@ class EditFactionView(discord.ui.View):
       await coleader.edit(nick=f"[{self.faction_name}] {coleader.name}")
       await coleader.add_roles(coleader_role)
       
-    async def f_remove_coleader(self, interaction: discord.Interaction):
+    async def f_remove_coleader(self, interaction: discord.Interaction, value: str):
       channel = discord.utils.get(interaction.guild.channels, id=int(self.channel))
-      await interaction.response.send_message(f"Please mention the member that you would like to be removed as a coleader from the faction `{self.faction_name}`.", ephemeral=True)
-      def check(m):
-        return m.author == interaction.user and m.channel == interaction.channel
-      msg = await self.client.wait_for('message', check=check)
       try:
-        the_id = msg.content.split("<@")[1].split(">")[0]
+        the_id = value.split("<@")[1].split(">")[0]
       except Exception:
-        return await interaction.edit_original_response(content= "Failed! Please make sure you **mention** a user.")
+        return await interaction.followup.send("Failed! Please make sure you mention a user.", ephemeral=True)
       rows = await execute(f"SELECT * FROM leader_factions WHERE `faction_name`= '{self.faction_name}'")
       if str(rows[0]['coleader_id_1'])==the_id:
         await self.edit_database('coleader_id_1', '')
-        await msg.delete()
       elif str(rows[0]['coleader_id_2'])==the_id:
         await self.edit_database('coleader_id_2', '')
-        await msg.delete()
       else:
-        return await interaction.edit_original_response(content= f"Failed! `{msg.content}` is not a coleader of the faction `{self.faction_name}`")
-      coleader = discord.utils.get(interaction.guild.members, id=int(the_id))
+        return await interaction.followup.send(f"Failed! `{value}` is not a coleader of the faction `{self.faction_name}`", ephemeral=True)
+      coleader = await interaction.guild.fetch_member(int(the_id))
       embed = discord.Embed(title="Coleader removed!", description=f"Uh oh! The coleader, `{coleader}` has been removed from this faction by a staff member, and is no longer in this channel anymore.", color=discord.Color.red())
       logo_url = self.client.app.embeds.get_logo_url("assets/Logo.png")
       embed.set_footer(text="Minecadia Leader Bot", icon_url = logo_url)
@@ -276,7 +263,7 @@ class EditFactionView(discord.ui.View):
       
     async def edit_ticket_perms(self, interaction: discord.Interaction, user_id: str, channel: discord.TextChannel, action):
       try:
-        user = discord.utils.get(interaction.guild.members, id=int(user_id))
+        user = await interaction.guild.fetch_member(int(user_id))
         perms = channel.overwrites_for(user)
         perms.view_channel = action
         perms.send_messages = action

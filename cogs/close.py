@@ -33,7 +33,7 @@ class close(commands.Cog):
       user_id = user.id
     content = f"Minecadia Leader Bot: Kitmap Bundle Ticket\n - Opened by: {user_name} ({user_id})\n \n---------------------------------------------------------------------------------\n \n"
     async for message in interaction.channel.history(limit=None, oldest_first=True):
-      content += f"[{message.created_at.strftime('%a, %b %d, %Y, %I:%M %p')}]\n{message.author.name} : {message.author.id}\n\t{message.content}\n \n"
+      content += f"[{message.created_at.strftime('%a, %b %d, %Y, %I:%M %p')}]\n{message.author.name} : {message.author.id}\n\t[message content unavailable without Message Content intent]\n \n"
     content += f"---------------------------------------------------------------------------------\n \n   - Closure Reason: {reason}\n   - Closed By: {interaction.user}\n   - Closed At: {datetime.utcnow().strftime('%a, %b %d, %Y, %I:%M %p')} UTC"
     response = requests.post(
       "https://paste.minecadia.com/documents",

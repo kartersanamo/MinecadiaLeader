@@ -17,7 +17,7 @@ class AcceptColeaderView(discord.ui.View):
   
   @discord.ui.button(label="Accept!", style= discord.ButtonStyle.red, custom_id= "pizza")
   async def acceptColeader(self, interaction: discord.Interaction, Button: discord.ui.Button):
-    coleader = discord.utils.get(interaction.guild.members, id=self.user)
+    coleader = await interaction.guild.fetch_member(self.user)
     await interaction.response.send_message(f"`{interaction.user}` has accepted `{coleader}` to being a coleader!")
     await interaction.message.delete()
     faction = interaction.channel.name.split("-")[0]
